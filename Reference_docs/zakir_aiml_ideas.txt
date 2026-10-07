@@ -1,0 +1,35 @@
+Use AI as an advisor on top of the safe rule-based hub. The hub keeps the final say on safety, and if the AI fails or sends a bad command, the system falls back to the fixed priority rules.
+
+**Where AI/ML adds value (pick 3)**
+1. **Solar and load forecasting.** Predict next-hour solar and each house's demand. Use a gradient-boosted model (XGBoost or LightGBM) or a small LSTM. Train on NASA POWER or PVGIS hourly data plus simulated load profiles.
+2. **Smart load shedding and battery planning.** Use the forecast to shed or hold loads before the battery runs low, and show "critical loads last X hours". Start with an optimisation or rule-plus-forecast approach (linear programming or simple model-predictive control). Avoid reinforcement learning (RL) here, since it needs more tuning than you have time for.
+3. **Anomaly and fraud detection.** Run Isolation Forest on voltage and current to catch a frozen sensor, abnormal loads or repeated card abuse.
+4. **Dynamic pricing (optional).** Set the price per unit from the ratio of supply to demand, so energy is cheaper when the battery is full.
+
+**Data flow**
+- The hub logs one row per second: voltage, power, SOC, credit and mode, as in your briefing's column format.
+- The laptop reads it over USB serial or Wi-Fi (MQTT or HTTP).
+- The Python model sends back a small command: battery set-point, loads to shed and price.
+- The hub checks the command against its safety limits and then applies or refuses it.
+
+**Training data**
+- Generate data from your Python digital twin by running thousands of simulated days with random outages, clouds and loads.
+- Mix in real NASA POWER or PVGIS irradiance so the solar pattern is realistic. Say clearly that load data is synthetic.
+- Split by day (train on some days, test on others), not randomly.
+
+**Build order for the time you have**
+1. Train the solar forecast from the dataset. This takes about an hour and gives you a MAE number.
+2. Add the forecast-aware shedding logic in the simulation.
+3. Compare it with a baseline that only uses fixed SOC thresholds.
+4. Add the anomaly detector on simulated faults.
+5. Connect it to the hub over serial.
+6. Show a live dashboard with forecast vs actual, SOC and runtime remaining.
+
+**Proof to show the jury**
+- Forecast error (MAE or RMSE).
+- Hours that critical loads survive with AI vs rule-only.
+- Fewer unnecessary load sheds.
+- Anomaly detection rate on injected faults.
+
+**Bonus (only if time allows)**
+Export a small decision tree to C and run it on the ESP32 (TinyML), so one feature works with no laptop.
