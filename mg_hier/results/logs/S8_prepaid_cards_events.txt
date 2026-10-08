@@ -1,0 +1,8 @@
+17:00:03 mode MAIN: BOOT -> ISLAND
+17:00:09 mode MAIN: ISLAND -> RESYNC
+17:00:45 mode MAIN: RESYNC -> GRID
+17:05:00 card H2: unknown card
+17:05:10 card H2: unknown card
+17:05:20 card H2: unknown card
+17:06:40 card H2: top-up accepted
+00:30:00 card H2: top-up accepted

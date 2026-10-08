@@ -1,0 +1,28 @@
+tmr = timer('StartDelay', 1, 'TimerFcn', @(~,~) evalin('base', 'try, run(''D:\Amogh\MATLAB_Projects\Commuinty_Micro_Grid\mg_hier\run_all_hier.m''); catch e, disp(getReport(e)); end; disp(''RUN_ALL_FINISHED''); diary off;'));
+start(tmr); disp('started')
+[1] firmware_node/config_node.h + docs/mosquitto/{mg.conf,acl} written
+Running test_hier
+.......... ..
+Done test_hier
+__________
+
+[2] unit tests 12/12
+[3] S1_normal_day              true  (  357 s, 466563 Pi messages)
+[3] S2_grid_outage             true  (  122 s, 136086 Pi messages)
+[3] S3_low_battery_outage      true  (   63 s, 77766 Pi messages)
+[3] S4_island_overload         true  (   11 s, 9726 Pi messages)
+[3] S5_island_surplus          true  (   41 s, 58326 Pi messages)
+[3] S6_faulty_house            true  (    7 s, 6486 Pi messages)
+[3] S7_abnormal_grid           true  (   14 s, 12969 Pi messages)
+[3] S8_prepaid_cards           true  (  126 s, 155528 Pi messages)
+[3] S9_ai_advisor              true  (   15 s, 14166 Pi messages)
+[3] S10_long_outage_blackout   true  (   96 s, 116646 Pi messages)
+[3] S11_demo_outage            true  (    9 s, 8106 Pi messages)
+[3] S12_node_comms_loss        true  (   12 s, 6483 Pi messages)
+[3] S13_dashboard_commands     true  (    7 s, 6500 Pi messages)
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 4 workers.
+[4] Monte Carlo 40/40 (1095 s)
+[5] SIL skipped here: no g++ on this PC. Run "bash tools/run_sil_node.sh" where g++ exists.
+[6] done. unit 12/12, scenarios 13/13, Monte Carlo 40/40, SIL []
+RUN_ALL_FINISHED

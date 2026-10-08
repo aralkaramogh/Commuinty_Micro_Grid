@@ -1,0 +1,22 @@
+Running test_hier
+.......... ...
+Done test_hier
+__________
+
+unit 13/13
+S1_normal_day 1 
+S2_grid_outage 1 
+S3_low_battery_outage 1 
+S4_island_overload 1 
+S5_island_surplus 1 
+S6_faulty_house 1 
+S7_abnormal_grid 1 
+S8_prepaid_cards 1 
+S9_ai_advisor 1 
+S10_long_outage_blackout 1 
+S11_demo_outage 1 
+S12_node_comms_loss 1 
+S13_dashboard_commands 1 
+panel lint 0
+panel opens 1
+REGRESS_DONE

@@ -1,0 +1,1 @@
+{"v":1,"tick":1,"sim_time":"10:00:00","sim_s":0,"node_id":"H2","link":"virtual","online":true,"meter":{"voltage_v":230,"current_a":0,"load_p_w":0,"load_q_var":0,"pv_p_w":0,"pv_q_var":0,"net_p_w":0},"relays":{"critical_on":false,"flexible_on":false},"protection":"ok","node_comm_lost":false,"energy":{"import_wh":0,"export_wh":0},"status_code":0}

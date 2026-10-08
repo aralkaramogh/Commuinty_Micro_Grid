@@ -1,0 +1,10 @@
+10:00:03 mode MAIN: BOOT -> ISLAND
+10:00:09 mode MAIN: ISLAND -> RESYNC
+10:00:28 mode MAIN: RESYNC -> GRID
+10:02:40 refused MAIN: user/user_flex id 3: not your house
+10:02:50 refused MAIN: op/cut_critical id 4: critical loads cannot be switched off
+10:03:00 refused MAIN: ai/restrict id 5: source not allowed
+10:03:10 refused MAIN: op/restrict id 1: duplicate id
+10:03:20 refused MAIN: op/restrict id 6: expired
+10:03:30 refused MAIN: op/restrict id 7: ttl out of range
+10:03:40 refused MAIN: op/restrict id 8: unknown target

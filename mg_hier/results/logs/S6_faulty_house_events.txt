@@ -1,0 +1,6 @@
+12:00:03 mode MAIN: BOOT -> ISLAND
+12:00:09 mode MAIN: ISLAND -> RESYNC
+12:00:11 mode MAIN: RESYNC -> GRID
+12:05:01 protection H2: tripped (retry)
+12:05:11 protection H2: ok
+12:05:13 protection H2: LOCKED OUT

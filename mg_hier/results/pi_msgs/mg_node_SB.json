@@ -1,0 +1,1 @@
+{"v":1,"tick":1,"sim_time":"10:00:00","sim_s":0,"node_id":"SB","link":"virtual","online":true,"bess":{"soc_pct":70,"p_w":-3134.94,"q_var":0,"fault":false},"inverter":{"p_applied_w":0,"q_applied_var":0,"clamped":false,"sync":false},"pv_p_w":3134.94,"node_comm_lost":false}
