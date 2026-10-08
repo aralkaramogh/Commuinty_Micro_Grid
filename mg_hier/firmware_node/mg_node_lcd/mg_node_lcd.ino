@@ -103,7 +103,7 @@ static void render(bool estop) {
             case 1: snprintf(l1, sizeof l1, "%s Critical load", nm); snprintf(l2, sizeof l2, "%s", lo.tie ? "ON" : "OFF"); break;
             case 2: snprintf(l1, sizeof l1, "%s Pump (flex)", nm); snprintf(l2, sizeof l2, "%s", lo.flex ? "ON" : "OFF"); break;
             default: snprintf(l1, sizeof l1, "%s Protection", nm);
-                    snprintf(l2, sizeof l2, "%s", lo.hstate == 0 ? "NORMAL" : (lo.hstate == 1 ? "FAULT: TRIPPED" : "FAULT: LOCKED")); break;
+                    snprintf(l2, sizeof l2, "%s", lo.hstate == 0 ? "NORMAL" : (lo.hstate == 1 ? "FAULT: TRIPPED" : (lo.hstate == 2 ? "FAULT: LOCKED" : "E-STOP"))); break;
         }
     } else {                                                 // house H1 / H2
         const double net = li.p_load - li.p_pv;
@@ -120,7 +120,9 @@ static void render(bool estop) {
         }
     }
     const int comm_lost = (role == 'B') ? so.comm_lost : lo.comm_lost;
+    const int latched = (role == 'B') ? (so.clamped == 2) : (lo.hstate == 3);
     if (estop) snprintf(l2, sizeof l2, "E-STOP PRESSED");
+    else if (latched) snprintf(l2, sizeof l2, "E-STOP: RESET");
     else if (comm_lost && p == 0) snprintf(l2, sizeof l2, "NO MAIN CTRL");
     show(l1, l2);
 }
@@ -168,14 +170,12 @@ void loop() {
         if (line[0] == 'L') {
             LoadIn x;
             if (!parse_L(line, x)) { Serial.println("E,parse"); continue; }
-            role = 'L'; load_step(ls, x, lo); li = x;
-            if (estop) { lo.tie = 0; lo.flex = 0; }
+            role = 'L'; load_step(ls, x, lo, estop); li = x;
             format_l(reply, sizeof reply, x, lo);
         } else if (line[0] == 'B') {
             SbIn x;
             if (!parse_B(line, x)) { Serial.println("E,parse"); continue; }
-            role = 'B'; sb_step(bs, x, so); bess_fault = x.bess_status; si = x;
-            if (estop) { so.p = 0; so.q = 0; so.sync = 0; }
+            role = 'B'; sb_step(bs, x, so, estop); bess_fault = x.bess_status; si = x;
             format_b(reply, sizeof reply, x, so);
         } else { Serial.println("E,unknown"); continue; }
         Serial.println(reply);                               // reply first, display after

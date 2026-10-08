@@ -18,11 +18,15 @@ if strcmp(id, 'SB'), st = node_sb_init(); else, st = node_load_init(); end
             writeline(lk.sp, sprintf('D,%d,%d,%.1f,%d', seq, di.mode, di.total_w, role));
         end
         reply = node_link_exchange(lk, line, seq);
+        % the E-stop button is on the board, so the twin learns it from the reply
+        % (hstate 3 / clamped 2) and must then behave identically
         if line(1) == 'L'
-            [st, r] = node_load_step(st, node_lines('dec_L', line), P.node, P.sim.dt);
+            es = sscanf(reply(3:end), '%f,', 4); es = numel(es) == 4 && es(4) == 3;
+            [st, r] = node_load_step(st, node_lines('dec_L', line), P.node, P.sim.dt, es);
             ref = node_lines('enc_l', seq, r);
         else
-            [st, r] = node_sb_step(st, node_lines('dec_B', line), P.node, P.bess);
+            es = sscanf(reply(3:end), '%f,', 5); es = numel(es) == 5 && es(5) == 2;
+            [st, r] = node_sb_step(st, node_lines('dec_B', line), P.node, P.bess, es);
             ref = node_lines('enc_b', seq, r);
         end
         node_twin_count('add', ~strcmp(reply, ref));

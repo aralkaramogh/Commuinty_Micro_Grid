@@ -19,5 +19,5 @@ st.price = P.ctrl.price_default;
 st.ai_active = 0; st.ai_age = 0; st.ai_p = 0;
 st.ids = nan(1, P.ctrl.N_ids); st.id_ptr = 0;                % recently seen command ids
 st.p2p = zeros(n + 1, n);                                   % [Wh] sold by (H1..Hn, C) to house j
-st.prev_hstate = zeros(1,nL);
+st.prev_hstate = zeros(1,nL); st.sb_estop = 0;
 end

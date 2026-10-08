@@ -12,6 +12,7 @@ sc.fault_fn     = @(t) 3.0 * pick('fault');        % 3 ohm short circuit where s
 sc.card_fn      = @(t) live_inputs('take_card');
 sc.link_fn      = @(t) pick('link_down') > 0;      % order H1, H2, CL, SB
 sc.cmd_fn       = @(t) take_cmds(t);
+sc.estop_fn     = @(t) pick('estop');              % E-stop buttons of virtual nodes [H1 H2 CL SB]
 sc.hour_fn      = @(t) pick('hour_shift');          % panel 'jump clock' (sun position, load profiles)
 sc.live = true;
 end

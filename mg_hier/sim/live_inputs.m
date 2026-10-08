@@ -15,7 +15,7 @@ persistent s
 if isempty(s) || strcmp(op, 'reset')
     s = struct('grid', 1, 'grid_v', 1, 'grid_f', 50, 'sun', 1, 'load', [1 1 1], ...
                'fault', [0 0], 'link_down', [0 0 0 0], 'stop', 0, ...
-               'card_house', 0, 'card_uid', 0, 'cmds', {{}}, 'n_cmd', 0, 'reset_node', 0, 'hour_shift', 0, 'now_h', 0);
+               'card_house', 0, 'card_uid', 0, 'cmds', {{}}, 'n_cmd', 0, 'reset_node', 0, 'hour_shift', 0, 'now_h', 0, 'estop', [0 0 0 0]);
 end
 v = [];
 switch op

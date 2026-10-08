@@ -1,9 +1,3 @@
-Running test_hier
-.......... ...
-Done test_hier
-__________
-
-unit 13/13
 S1_normal_day 1 
 S2_grid_outage 1 
 S3_low_battery_outage 1 
@@ -17,6 +11,8 @@ S10_long_outage_blackout 1
 S11_demo_outage 1 
 S12_node_comms_loss 1 
 S13_dashboard_commands 1 
-panel lint 0
-panel opens 1
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 4 workers.
+MC 12/12
+panel opens 1 lint 0
 REGRESS_DONE

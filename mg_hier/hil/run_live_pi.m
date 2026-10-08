@@ -8,7 +8,7 @@ PI_USER = 'mgctl';
 PI_PASS = '';                   % <- typed here at run time; do not save it in the file
 PORTS   = {};                   % e.g. {'H1','COM14'; 'SB','COM16'}; {} = all nodes virtual
 LCD_NODES = {};     % boards flashed with firmware_node/mg_node_lcd (16x2 I2C LCD), e.g. {'H1','SB'}
-SCEN    = 'LIVE';               % 'LIVE' = you pull the grid with the panel / dashboard; or e.g. 'S11_demo_outage'
+SCEN    = 'S11_demo_outage';               % 'LIVE' = you pull the grid with the panel / dashboard; or e.g. 'S11_demo_outage'
 PACE_S  = 0.25;                 % seconds per tick (1 = real time; 0.25 = 4x faster; 0 = as fast as possible)
 % Leave PI_HOST = '' to run without the Pi (panel + boards only).
 

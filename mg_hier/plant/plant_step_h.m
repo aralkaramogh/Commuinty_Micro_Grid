@@ -51,6 +51,9 @@ Yh = tie .* Yh;
 [P_lo, P_hi] = bess_limits(ps.soc, P);
 c = 0; Pb = 0; Qb = 0; Vc = 0; Vh = zeros(1,n); Ih = zeros(1,n); f_mg = 0;
 P_pcc = 0; Q_pcc = 0; mode = 'dead'; Ppv = zeros(1,n); Qp = zeros(1,n);
+if isfield(act, 'bess_stop') && act.bess_stop && ~(act.breaker && grid_avail)
+    ps.bess_trip = true;                     % E-stop on the SB node: the inverter stops; an island goes dark
+end
 if act.breaker && grid_avail
     mode = 'grid';
 elseif ~act.breaker && ~ps.bess_trip

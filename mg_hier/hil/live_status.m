@@ -31,7 +31,8 @@ h.top.Text = sprintf(['sim time  %s\nmode      %s\ngrid      %s, breaker %s\nfre
 lines = strings(0, 1); on = ["off", "ON "];
 for j = 1:P.n_load
     c = o.code(j); why = "";
-    if bitand(c, 3) == 1, why = why + " TRIPPED"; elseif bitand(c, 3) == 2, why = why + " LOCKED OUT"; end
+    if bitand(c, 3) == 1, why = why + " TRIPPED"; elseif bitand(c, 3) == 2, why = why + " LOCKED OUT";
+    elseif bitand(c, 3) == 3, why = why + " E-STOP (reset needed)"; end
     if bitand(c, 4), why = why + " shed:battery"; end
     if bitand(c, 8), why = why + " no credit"; end
     if bitand(c, 32), why = why + " shed:frequency"; end
@@ -41,6 +42,9 @@ for j = 1:P.n_load
     if bitand(c, 1024), why = why + " NODE OFFLINE"; end
     bal = ""; if j <= P.n_house, bal = sprintf("  Rs %6.2f", o.bal(j)); end
     lines(end+1) = sprintf("%-3s critical %s flexible %s%s%s", P.load_id{j}, on(act.tie(j) + 1), on(act.flex(j) + 1), bal, why); %#ok<AGROW>
+end
+if bitand(o.flags, 32)
+    lines(end+1) = "SB  BATTERY INVERTER STOPPED (E-stop or overload trip)";
 end
 if bitand(o.flags, 128) && o.offline(end)
     lines(end+1) = "SB  LINK DOWN: main controller uses last known battery data, node holds last set-point";

@@ -29,7 +29,7 @@ d = P.net.cmd_delay; assert(d >= 1 && d == round(d), 'cmd_delay must be a whole 
 
 ps = plant_init_h(Pp, sc.soc0);
 nst = repmat(node_load_init(), 1, nL); sbst = node_sb_init(); mst = main_init(P);
-act = struct('breaker', 0, 'sync', 0, 'tie', zeros(1,nL), 'flex', zeros(1,nL), 'p_set', 0, 'q_set', 0);
+act = struct('breaker', 0, 'sync', 0, 'tie', zeros(1,nL), 'flex', zeros(1,nL), 'p_set', 0, 'q_set', 0, 'bess_stop', 0);
 cmdq = cell(1, d); mode_prev = 0;                       % commands on their way to the nodes (empty = none yet)
 Sx = main_inputs_spec();
 zl = cell2struct(num2cell(zeros(1, numel(Sx.load))), Sx.load, 2);
@@ -90,6 +90,8 @@ for i = 1:N
     end
     if isfield(sc, 'link_fn'), down = down | sc.link_fn(t_s); end    % live: cable pulled
     c_in = cmdq{1};
+    estop_now = false(1, nN);                         % E-stop buttons of VIRTUAL nodes (live panel)
+    if isfield(sc, 'estop_fn'), estop_now = sc.estop_fn(t_s) > 0; end
     if isfield(sc, 'live') && sc.live                 % live: technician resets a node (clears its lockout)
         rn = live_inputs('take_reset');
         if rn >= 1 && rn <= nL
@@ -116,7 +118,7 @@ for i = 1:N
         end
         lin = node_lines('enc_L', i, c, mtr);
         if isempty(opts.exchange{j})
-            [nst(j), r] = node_load_step(nst(j), node_lines('dec_L', lin), P.node, dt);
+            [nst(j), r] = node_load_step(nst(j), node_lines('dec_L', lin), P.node, dt, estop_now(j));
             lout = node_lines('enc_l', i, r);
         else
             lout = opts.exchange{j}(lin, i);
@@ -140,7 +142,7 @@ for i = 1:N
     end
     lin = node_lines('enc_B', i, c, mtr);
     if isempty(opts.exchange{nN})
-        [sbst, r] = node_sb_step(sbst, node_lines('dec_B', lin), P.node, P.bess);
+        [sbst, r] = node_sb_step(sbst, node_lines('dec_B', lin), P.node, P.bess, estop_now(nN));
         lout = node_lines('enc_b', i, r);
     else
         lout = opts.exchange{nN}(lin, i);
@@ -148,6 +150,7 @@ for i = 1:N
     rb = node_lines('dec_b', lout);
     assert(rb.seq == i, 'node SB: sequence mismatch at tick %d', i);
     act.p_set = rb.p; act.q_set = rb.q; act.sync = rb.sync;
+    act.bess_stop = rb.clamped == 2;                  % SB E-stop: inverter stopped
     sbrep = zs;
     if ~down(nN), rb2 = rmfield(rb, 'seq'); rb2.ok = 1; sbrep = orderfields(rb2, zs); end
     if opts.keep_frames, L.lin{i, nN} = lin; L.lout{i, nN} = lout; end

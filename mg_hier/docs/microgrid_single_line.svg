@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 700" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2b6cb0"/></marker>
+    <marker id="c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#888"/></marker>
+  </defs>
+  <rect width="1100" height="700" fill="#ffffff"/>
+  <text x="550" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#1a202c">URJA Community Microgrid - single-line diagram (230 V, 50 Hz)</text>
+  <text x="550" y="54" text-anchor="middle" fill="#4a5568">Power layer (top, simulated in MATLAB) and control layer (bottom, real controllers). Blue arrows = power can flow both ways.</text>
+
+  <!-- utility grid -->
+  <circle cx="110" cy="150" r="34" fill="#edf2f7" stroke="#2d3748" stroke-width="2"/>
+  <path d="M88 150 q11 -18 22 0 q11 18 22 0" fill="none" stroke="#2d3748" stroke-width="2"/>
+  <text x="110" y="205" text-anchor="middle" font-weight="700">Utility grid</text>
+  <text x="110" y="222" text-anchor="middle" fill="#4a5568">230 V, 50 Hz</text>
+  <line x1="144" y1="150" x2="230" y2="150" stroke="#2d3748" stroke-width="3"/>
+  <!-- PCC breaker -->
+  <rect x="230" y="130" width="40" height="40" fill="#c6f6d5" stroke="#276749" stroke-width="2"/>
+  <line x1="236" y1="164" x2="264" y2="136" stroke="#276749" stroke-width="3"/>
+  <text x="250" y="110" text-anchor="middle" font-weight="700">Grid breaker (PCC)</text>
+  <text x="250" y="195" text-anchor="middle" fill="#4a5568">sync check + meter</text>
+  <text x="250" y="211" text-anchor="middle" fill="#4a5568">opened = ISLAND</text>
+  <line x1="270" y1="150" x2="330" y2="150" stroke="#2d3748" stroke-width="3"/>
+  <line x1="330" y1="150" x2="330" y2="300" stroke="#2d3748" stroke-width="3"/>
+  <line x1="300" y1="190" x2="300" y2="260" stroke="#2b6cb0" stroke-width="2.5" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <!-- community bus -->
+  <line x1="330" y1="300" x2="1040" y2="300" stroke="#1a202c" stroke-width="7"/>
+  <text x="1040" y="288" text-anchor="end" font-weight="700">Community bus (AC)</text>
+
+  <!-- SB -->
+  <line x1="430" y1="300" x2="430" y2="240" stroke="#2d3748" stroke-width="3"/>
+  <rect x="360" y="140" width="140" height="100" rx="8" fill="#fefcbf" stroke="#975a16" stroke-width="2"/>
+  <text x="430" y="162" text-anchor="middle" font-weight="700">Solar + BESS (SB)</text>
+  <text x="430" y="182" text-anchor="middle">PV 5 kWp</text>
+  <text x="430" y="200" text-anchor="middle">Battery 10 kWh</text>
+  <text x="430" y="218" text-anchor="middle">Inverter 6 kVA / 5 kW</text>
+  <text x="430" y="234" text-anchor="middle" fill="#975a16" font-size="11">forms the island</text>
+  <line x1="515" y1="250" x2="515" y2="190" stroke="#2b6cb0" stroke-width="2.5" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <!-- CL -->
+  <line x1="620" y1="300" x2="620" y2="240" stroke="#2d3748" stroke-width="3"/>
+  <rect x="550" y="140" width="140" height="100" rx="8" fill="#e9d8fd" stroke="#553c9a" stroke-width="2"/>
+  <text x="620" y="162" text-anchor="middle" font-weight="700">Community load (CL)</text>
+  <text x="620" y="184" text-anchor="middle">Critical 600 W</text>
+  <text x="620" y="202" text-anchor="middle" fill="#4a5568">street lights, hall</text>
+  <text x="620" y="222" text-anchor="middle">Pump 1.5 kW (flexible)</text>
+
+  <!-- H1 -->
+  <line x1="800" y1="300" x2="800" y2="370" stroke="#2d3748" stroke-width="3"/>
+  <text x="808" y="340" fill="#4a5568" font-size="11">cable 0.20 ohm</text>
+  <rect x="730" y="370" width="140" height="110" rx="8" fill="#c6f6d5" stroke="#276749" stroke-width="2"/>
+  <text x="800" y="392" text-anchor="middle" font-weight="700">House H1 (prosumer)</text>
+  <text x="800" y="412" text-anchor="middle">Rooftop PV 3 kWp</text>
+  <text x="800" y="430" text-anchor="middle">Critical 300 W</text>
+  <text x="800" y="448" text-anchor="middle">Flexible 1.5 kW</text>
+  <text x="800" y="468" text-anchor="middle" fill="#276749" font-size="11">sells surplus to neighbours</text>
+  <line x1="760" y1="310" x2="760" y2="360" stroke="#2b6cb0" stroke-width="2.5" marker-start="url(#a)" marker-end="url(#a)"/>
+
+  <!-- H2 -->
+  <line x1="970" y1="300" x2="970" y2="370" stroke="#2d3748" stroke-width="3"/>
+  <text x="978" y="340" fill="#4a5568" font-size="11">cable 0.30 ohm</text>
+  <rect x="900" y="370" width="140" height="110" rx="8" fill="#fed7d7" stroke="#9b2c2c" stroke-width="2"/>
+  <text x="970" y="392" text-anchor="middle" font-weight="700">House H2 (consumer)</text>
+  <text x="970" y="412" text-anchor="middle">No PV</text>
+  <text x="970" y="430" text-anchor="middle">Critical 300 W</text>
+  <text x="970" y="448" text-anchor="middle">Flexible 1.2 kW</text>
+  <text x="970" y="468" text-anchor="middle" fill="#9b2c2c" font-size="11">prepaid card, Rs 10 start</text>
+
+  <!-- divider -->
+  <line x1="30" y1="510" x2="1070" y2="510" stroke="#a0aec0" stroke-dasharray="6 6"/>
+  <text x="40" y="530" fill="#718096" font-weight="700">CONTROL LAYER</text>
+
+  <!-- nodes -->
+  <g font-size="12">
+    <rect x="370" y="545" width="120" height="44" rx="6" fill="#ebf8ff" stroke="#2b6cb0"/><text x="430" y="565" text-anchor="middle" font-weight="700">SB node (ESP32)</text><text x="430" y="581" text-anchor="middle">battery limits</text>
+    <rect x="560" y="545" width="120" height="44" rx="6" fill="#ebf8ff" stroke="#2b6cb0"/><text x="620" y="565" text-anchor="middle" font-weight="700">CL node (ESP32)</text><text x="620" y="581" text-anchor="middle">relays, trip, E-stop</text>
+    <rect x="740" y="545" width="120" height="44" rx="6" fill="#ebf8ff" stroke="#2b6cb0"/><text x="800" y="565" text-anchor="middle" font-weight="700">H1 node (ESP32)</text><text x="800" y="581" text-anchor="middle">relays, trip, E-stop</text>
+    <rect x="910" y="545" width="120" height="44" rx="6" fill="#ebf8ff" stroke="#2b6cb0"/><text x="970" y="565" text-anchor="middle" font-weight="700">H2 node (ESP32)</text><text x="970" y="581" text-anchor="middle">relays, RFID, E-stop</text>
+  </g>
+  <g stroke="#888" stroke-dasharray="4 4" fill="none">
+    <line x1="430" y1="545" x2="430" y2="245"/><line x1="620" y1="545" x2="620" y2="245"/>
+    <line x1="800" y1="545" x2="800" y2="485"/><line x1="970" y1="545" x2="970" y2="485"/>
+  </g>
+  <!-- main controller + pi -->
+  <rect x="60" y="610" width="230" height="64" rx="8" fill="#2b6cb0" stroke="#1a365d"/>
+  <text x="175" y="633" text-anchor="middle" fill="#fff" font-weight="700">Main controller (MATLAB)</text>
+  <text x="175" y="651" text-anchor="middle" fill="#e2e8f0" font-size="12">modes, sync, battery dispatch,</text>
+  <text x="175" y="666" text-anchor="middle" fill="#e2e8f0" font-size="12">shedding, prepaid ledger</text>
+  <path d="M290 640 H1000 V589" fill="none" stroke="#888" stroke-width="1.5" marker-end="url(#c)"/>
+  <path d="M430 640 V589 M620 640 V589 M800 640 V589" fill="none" stroke="#888" stroke-width="1.5" marker-end="url(#c)"/>
+  <text x="700" y="632" fill="#4a5568" font-size="12">commands down, reports up (USB, 1 line per second)</text>
+  <path d="M290 618 H312 V180 H262" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#c)"/>
+  <text x="306" y="490" fill="#4a5568" font-size="12" transform="rotate(-90 306 490)">breaker command + grid meter</text>
+  <rect x="60" y="530" width="230" height="56" rx="8" fill="#f0fff4" stroke="#276749"/>
+  <text x="175" y="553" text-anchor="middle" font-weight="700">Raspberry Pi</text>
+  <text x="175" y="571" text-anchor="middle" font-size="12">MQTT broker, database, dashboards</text>
+  <line x1="175" y1="610" x2="175" y2="590" stroke="#276749" stroke-width="2" marker-start="url(#c)" marker-end="url(#c)"/>
+</svg>

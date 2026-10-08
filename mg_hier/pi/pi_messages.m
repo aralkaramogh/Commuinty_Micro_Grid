@@ -6,7 +6,7 @@ v = P.pi.version; n = P.n_house; nL = P.n_load; tick = st.tick;
 hh = mod(t0_h * 3600 + t_s, 86400);
 simt = sprintf('%02d:%02d:%02d', floor(hh/3600), floor(mod(hh,3600)/60), floor(mod(hh,60)));
 hdr = @(s) setfield(setfield(setfield(setfield(s, 'v', v), 'tick', tick), 'sim_time', simt), 'sim_s', t_s); %#ok<SFLD>
-mn = {'BOOT','GRID','ISLAND','RESYNC'}; hs = {'ok','tripped','locked'};
+mn = {'BOOT','GRID','ISLAND','RESYNC'}; hs = {'ok','tripped','locked','estop'};
 M = struct('topic', {}, 'payload', {});
 if mod(tick - 1, P.pi.state_every) == 0
     s = hdr(struct());
@@ -40,7 +40,7 @@ if mod(tick - 1, P.pi.state_every) == 0
     s = hdr(struct()); b = st.sb;
     s.node_id = 'SB'; s.link = links{nL + 1}; s.online = ~o.offline(nL + 1);
     s.bess = struct('soc_pct', 100 * b.soc, 'p_w', b.p_bess, 'q_var', b.q_bess, 'fault', b.bess_status ~= 0);
-    s.inverter = struct('p_applied_w', b.p, 'q_applied_var', b.q, 'clamped', b.clamped == 1, 'sync', b.sync == 1);
+    s.inverter = struct('p_applied_w', b.p, 'q_applied_var', b.q, 'clamped', b.clamped == 1, 'sync', b.sync == 1, 'estop', b.clamped == 2);
     s.pv_p_w = b.p_cpv; s.node_comm_lost = b.comm_lost == 1;
     M(end+1) = struct('topic', 'mg/node/SB', 'payload', s);
 end

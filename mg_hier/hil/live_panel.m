@@ -6,12 +6,12 @@ function f = live_panel()
 % Right: live read-outs (mode, battery, grid, every node's relays, balances, log).
 live_inputs('reset');
 old = findall(groot, 'Tag', 'mgLivePanel'); delete(old);
-f = uifigure('Name', 'URJA microgrid - live demo panel', 'Position', [40 100 1060 600], 'Tag', 'mgLivePanel');
+f = uifigure('Name', 'URJA microgrid - live demo panel', 'Position', [40 60 1060 680], 'Tag', 'mgLivePanel');
 g = uigridlayout(f, [1 3]); g.ColumnWidth = {300, 300, '1x'};
 
 % ---------- WORLD ----------
 w = uipanel(g, 'Title', 'WORLD (simulated power system)', 'FontWeight', 'bold');
-gw = uigridlayout(w, [16 2]); gw.RowHeight = repmat({24}, 1, 16);
+gw = uigridlayout(w, [20 2]); gw.RowHeight = repmat({22}, 1, 20);
 uilabel(gw, 'Text', 'Utility grid', 'FontWeight', 'bold'); uilabel(gw, 'Text', '');
 uibutton(gw, 'Text', 'Grid OFF (outage)', 'ButtonPushedFcn', @(~,~) live_inputs('set', 'grid', 0));
 uibutton(gw, 'Text', 'Grid ON',           'ButtonPushedFcn', @(~,~) live_inputs('set', 'grid', 1));
@@ -36,15 +36,20 @@ ids = {'H1', 'H2', 'CL', 'SB'};
 for k = 1:4
     uicheckbox(gw, 'Text', ['Cut link ' ids{k}], 'ValueChangedFcn', @(c,~) live_inputs('set_el', 'link_down', [k c.Value]));
 end
-uibutton(gw, 'Text', 'Technician: reset H1', 'ButtonPushedFcn', @(~,~) live_inputs('set', 'reset_node', 1));
-uibutton(gw, 'Text', 'Technician: reset H2', 'ButtonPushedFcn', @(~,~) live_inputs('set', 'reset_node', 2));
+uilabel(gw, 'Text', 'E-stop (virtual nodes)', 'FontWeight', 'bold'); uilabel(gw, 'Text', 'held = pressed');
+for k = 1:4
+    uibutton(gw, 'state', 'Text', ['E-STOP ' ids{k}], 'ValueChangedFcn', @(b,~) live_inputs('set_el', 'estop', [k b.Value]));
+end
+for k = 1:4
+    uibutton(gw, 'Text', ['Technician: reset ' ids{k}], 'ButtonPushedFcn', @(~,~) live_inputs('set', 'reset_node', k));
+end
 uilabel(gw, 'Text', 'RFID card at H2', 'FontWeight', 'bold'); uilabel(gw, 'Text', '');
 uibutton(gw, 'Text', 'Tap valid card (+Rs 20)', 'ButtonPushedFcn', @(~,~) live_inputs('tap', 2, 2712847106));
 uibutton(gw, 'Text', 'Tap wrong card',          'ButtonPushedFcn', @(~,~) live_inputs('tap', 2, 305419896));
 
 % ---------- REQUESTS ----------
 r = uipanel(g, 'Title', 'REQUESTS to the main controller', 'FontWeight', 'bold');
-gr = uigridlayout(r, [12 1]); gr.RowHeight = repmat({30}, 1, 12);
+gr = uigridlayout(r, [9 1]); gr.RowHeight = repmat({30}, 1, 9);
 uilabel(gr, 'Text', 'Operator (main dashboard)', 'FontWeight', 'bold');
 uibutton(gr, 'Text', 'Restrict CL pump 10 min',  'ButtonPushedFcn', @(~,~) req('op', 'restrict', 'CL', 1, 600));
 uibutton(gr, 'Text', 'Restrict H2 flexible 10 min', 'ButtonPushedFcn', @(~,~) req('op', 'restrict', 'H2', 1, 600));
@@ -53,9 +58,6 @@ uibutton(gr, 'Text', 'TRY: cut H2 critical load (must be refused)', 'ButtonPushe
 uilabel(gr, 'Text', 'Household H1 (user dashboard)', 'FontWeight', 'bold');
 uibutton(gr, 'Text', 'H1: switch my flexible load off 5 min', 'ButtonPushedFcn', @(~,~) req('user/H1', 'user_flex', 'H1', 0, 300));
 uibutton(gr, 'Text', 'TRY: H1 switches off H2 (must be refused)', 'ButtonPushedFcn', @(~,~) req('user/H1', 'user_flex', 'H2', 0, 300));
-uilabel(gr, 'Text', 'AI advisor', 'FontWeight', 'bold');
-uibutton(gr, 'Text', 'AI: price Rs 4/kWh, shed pump (30 s)', 'ButtonPushedFcn', @(~,~) ai(4, 4));
-uibutton(gr, 'Text', 'TRY: AI price Rs 50 (must be refused)', 'ButtonPushedFcn', @(~,~) ai(50, 0));
 uibutton(gr, 'Text', 'STOP run', 'BackgroundColor', [1 .8 .8], 'ButtonPushedFcn', @(~,~) live_inputs('set', 'stop', 1));
 
 % ---------- READ-OUTS ----------
@@ -78,9 +80,4 @@ end
 function req(src, kind, target, value, ttl)
 id = round(1e3 * posixtime(datetime('now'))) + randi(999);       % unique request id
 live_inputs('push_cmd', ['mg/cmd/' src '/' kind], struct('id', id, 'target', target, 'value', value, 'ttl', ttl));
-end
-
-function ai(price, mask)
-id = round(1e3 * posixtime(datetime('now'))) + randi(999);
-live_inputs('push_cmd', 'mg/cmd/ai/ai_advice', struct('id', id, 'p_bess', 0, 'shed_mask', mask, 'price', price));
 end

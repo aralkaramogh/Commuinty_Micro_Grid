@@ -23,7 +23,12 @@ end
 if in.sb.ok, st.sb = in.sb; st.n_stale_sb = 0; else, st.n_stale_sb = st.n_stale_sb + 1; end
 offline = [st.n_stale, st.n_stale_sb] >= P.node.N_comm_lost;
 soc = st.sb.soc;
-bess_fault = st.sb.bess_status ~= 0;
+bess_fault = st.sb.bess_status ~= 0 || st.sb.clamped == 2;   % trip or E-stop
+if (st.sb.clamped == 2) ~= st.sb_estop
+    st.sb_estop = double(st.sb.clamped == 2);
+    if st.sb_estop, tx = 'E-STOP pressed: inverter stopped (reset needed)'; else, tx = 'E-STOP cleared'; end
+    o.events{end+1} = struct('type', 'protection', 'node', 'SB', 'text', tx);
+end
 
 % ---------- grid health (PCC meter) ----------
 m = in.pcc;
@@ -213,7 +218,7 @@ o.code = zeros(1,nL);
 for j = 1:nL
     r = st.rep(j);
     if r.hstate ~= st.prev_hstate(j)
-        hs = {'ok','tripped (retry)','LOCKED OUT'};
+        hs = {'ok','tripped (retry)','LOCKED OUT','E-STOP pressed (reset needed)'};
         o.events{end+1} = struct('type', 'protection', 'node', P.load_id{j}, 'text', hs{r.hstate+1});
         st.prev_hstate(j) = r.hstate;
     end
@@ -253,7 +258,7 @@ for j = 1:nL
               shed_op(j) == 0 && shed_user(j) == 0 && credit_ok == 1;
     o.cmd_load(j).enable = double(booted);       % critical loads: on once booted, never commanded off
     o.cmd_load(j).flex_allow = double(booted && flex_ok);
-    if r.hstate == 2, any_locked = 1; end
+    if r.hstate >= 2, any_locked = 1; end         % locked out or E-stop: needs a person
     if st.shed_soc(j) || st.shed_uf(j) || st.shed_ai(j) || shed_op(j), any_shed = 1; end
     lock_k = 0; if j <= n, lock_k = st.card_lock(j) > 0; end
     o.code(j) = r.hstate + 4*st.shed_soc(j) + 8*(1 - credit_ok) + 16*lock_k + 32*st.shed_uf(j) ...

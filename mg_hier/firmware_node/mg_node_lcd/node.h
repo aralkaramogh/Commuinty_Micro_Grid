@@ -8,16 +8,18 @@
 struct LoadIn  { long seq; int valid, enable, flex_allow; double v, i, p_load, q_load, p_pv, q_pv; uint32_t card_uid; };
 struct LoadOut { int tie, flex, hstate, strikes, comm_lost; double e_imp, e_exp; };
 struct LoadSt  { int enabled, flex_allow; long n_nocmd; int hstate, n_oc, strikes, n_healthy, retry, tie, flex;
-                 double e_imp, e_exp; };
+                 double e_imp, e_exp; int estop; };
 struct SbIn    { long seq; int valid; double p_set, q_set; int sync; double soc, p_bess, q_bess;
                  int bess_status; double v_c, f_mg, p_cpv; };
 struct SbOut   { double p, q; int sync, clamped, comm_lost; };
-struct SbSt    { long n_nocmd; double p_cmd, q_cmd; int sync_cmd; };
+struct SbSt    { long n_nocmd; double p_cmd, q_cmd; int sync_cmd; int estop; };
 
 void load_init(LoadSt& st);
-void load_step(LoadSt& st, const LoadIn& x, LoadOut& r);
+// estop = button pressed now. Latched in the state until load_init/sb_init (R line).
+// Reported as hstate = 3 (load node) / clamped = 2 (SB node).
+void load_step(LoadSt& st, const LoadIn& x, LoadOut& r, bool estop = false);
 void sb_init(SbSt& st);
-void sb_step(SbSt& st, const SbIn& x, SbOut& r);
+void sb_step(SbSt& st, const SbIn& x, SbOut& r, bool estop = false);
 
 bool parse_L(const char* line, LoadIn& x);
 bool parse_B(const char* line, SbIn& x);

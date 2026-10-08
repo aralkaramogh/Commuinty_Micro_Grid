@@ -8,10 +8,11 @@
 void load_init(LoadSt& s) {
     s.enabled = 0; s.flex_allow = 0; s.n_nocmd = 0;
     s.hstate = 0; s.n_oc = 0; s.strikes = 0; s.n_healthy = 0; s.retry = 0;
-    s.tie = 0; s.flex = 0; s.e_imp = 0; s.e_exp = 0;
+    s.tie = 0; s.flex = 0; s.e_imp = 0; s.e_exp = 0; s.estop = 0;
 }
 
-void load_step(LoadSt& s, const LoadIn& x, LoadOut& r) {
+void load_step(LoadSt& s, const LoadIn& x, LoadOut& r, bool estop) {
+    if (estop) s.estop = 1;                      // E-stop latch (cleared only by load_init)
     if (x.valid) {
         s.n_nocmd = 0;
         if (x.enable) s.enabled = 1;             // latched: a command never switches critical off
@@ -20,7 +21,9 @@ void load_step(LoadSt& s, const LoadIn& x, LoadOut& r) {
         s.n_nocmd = (s.n_nocmd + 1 < 1000000L) ? s.n_nocmd + 1 : 1000000L;
     }
     const bool comm_lost = s.n_nocmd >= N_COMM_LOST;
-    if (s.hstate == 0) {                         // over-current protection
+    if (s.estop) {
+        // E-stop latched: protection frozen, relays forced open below
+    } else if (s.hstate == 0) {                  // over-current protection
         if (s.tie && x.i > I_TRIP) s.n_oc++; else s.n_oc = 0;
         if (s.n_oc >= N_OC) {
             s.strikes++; s.n_oc = 0; s.n_healthy = 0;
@@ -34,21 +37,22 @@ void load_step(LoadSt& s, const LoadIn& x, LoadOut& r) {
         s.retry--;
         if (s.retry <= 0) { s.hstate = 0; s.n_healthy = 0; }
     }
-    s.tie  = (s.enabled == 1 && s.hstate == 0) ? 1 : 0;
+    s.tie  = (s.enabled == 1 && s.hstate == 0 && s.estop == 0) ? 1 : 0;
     s.flex = (s.tie == 1 && s.flex_allow == 1 && !comm_lost) ? 1 : 0;
     const double p_net = x.p_load - x.p_pv;      // energy counters [Wh]
     if (p_net > 0) s.e_imp = s.e_imp + p_net * DT_S / 3600;
     else           s.e_exp = s.e_exp - p_net * DT_S / 3600;
-    r.tie = s.tie; r.flex = s.flex; r.hstate = s.hstate; r.strikes = s.strikes;
+    r.tie = s.tie; r.flex = s.flex; r.hstate = s.estop ? 3 : s.hstate; r.strikes = s.strikes;
     r.comm_lost = comm_lost ? 1 : 0; r.e_imp = s.e_imp; r.e_exp = s.e_exp;
 }
 
-void sb_init(SbSt& s) { s.n_nocmd = 0; s.p_cmd = 0; s.q_cmd = 0; s.sync_cmd = 0; }
+void sb_init(SbSt& s) { s.n_nocmd = 0; s.p_cmd = 0; s.q_cmd = 0; s.sync_cmd = 0; s.estop = 0; }
 
 static double mn(double a, double b) { return a < b ? a : b; }
 static double mx(double a, double b) { return a > b ? a : b; }
 
-void sb_step(SbSt& s, const SbIn& x, SbOut& r) {
+void sb_step(SbSt& s, const SbIn& x, SbOut& r, bool estop) {
+    if (estop) s.estop = 1;                      // E-stop latch
     if (x.valid) { s.n_nocmd = 0; s.p_cmd = x.p_set; s.q_cmd = x.q_set; s.sync_cmd = x.sync; }
     else s.n_nocmd = (s.n_nocmd + 1 < 1000000L) ? s.n_nocmd + 1 : 1000000L;
     const bool comm_lost = s.n_nocmd >= N_COMM_LOST;
@@ -61,6 +65,7 @@ void sb_step(SbSt& s, const SbIn& x, SbOut& r) {
     r.sync = (s.sync_cmd == 1 && !comm_lost) ? 1 : 0;
     r.clamped = (p != s.p_cmd || q != s.q_cmd) ? 1 : 0;
     r.comm_lost = comm_lost ? 1 : 0;
+    if (s.estop) { r.p = 0; r.q = 0; r.sync = 0; r.clamped = 2; }   // inverter stopped
 }
 
 // ---------- text lines ----------

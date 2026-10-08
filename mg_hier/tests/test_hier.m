@@ -204,3 +204,38 @@ st = jsondecode(S(find(strcmp(tp, 'mg/state'), 1, 'last')).data);
 verifyEqual(tc, st.v, 1); verifyEqual(tc, st.tick, 120);
 verifyNotEmpty(tc, st.wall_time);                                     % live runs carry the PC clock
 end
+
+% ---------- E-stop ----------
+function test_estop_latch_nodes(tc)
+P = tc.TestData.P; N = P.node; st = node_load_init();
+x = struct('valid', 1, 'enable', 1, 'flex_allow', 1, 'v', 230, 'i', 5, 'p_load', 1000, 'q_load', 0, ...
+           'p_pv', 0, 'q_pv', 0, 'card_uid', 0);
+[st, r] = node_load_step(st, x, N, 1, 0); verifyEqual(tc, [r.tie r.flex r.hstate], [1 1 0]);
+[st, r] = node_load_step(st, x, N, 1, 1); verifyEqual(tc, [r.tie r.flex r.hstate], [0 0 3]);   % pressed
+for k = 1:5, [st, r] = node_load_step(st, x, N, 1, 0); end
+verifyEqual(tc, [r.tie r.flex r.hstate], [0 0 3]);                   % released: still latched
+st = node_load_init(); [~, r] = node_load_step(st, x, N, 1, 0);       % technician reset (R)
+verifyEqual(tc, [r.tie r.flex r.hstate], [1 1 0]);
+sb = node_sb_init();
+y = struct('valid', 1, 'p_set', 3000, 'q_set', 500, 'sync', 1, 'soc', 0.7, 'p_bess', 0, 'q_bess', 0, ...
+           'bess_status', 0, 'v_c', 230, 'f_mg', 50, 'p_cpv', 0);
+[sb, r] = node_sb_step(sb, y, N, P.bess, 1); verifyEqual(tc, [r.p r.q r.sync r.clamped], [0 0 0 2]);
+[~, r] = node_sb_step(sb, y, N, P.bess, 0);  verifyEqual(tc, r.clamped, 2);                  % latched
+end
+
+function test_estop_system(tc)
+% live run, virtual nodes: E-stop H1 (latched, reported, reset restores) and SB in island (island goes dark)
+P = tc.TestData.P; live_inputs('reset');
+sc = live_scenario(P, 12, 400);
+sc.estop_fn = @(t) [(t >= 100 && t < 110), 0, 0, (t >= 300)];
+sc.grid_fn  = @(t) [~(t >= 250), 50];                                 % outage from 250 s
+sc.link_fn  = @(t) (t == 200 && isempty(live_inputs('set', 'reset_node', 1))) | false(1, 4);
+R = run_hier(sc, P, struct('pi', false)); L = R.L; t = L.t;
+verifyTrue(tc, all(L.tie(t >= 100 & t < 200, 1) == 0));              % pressed, then still latched after release
+verifyTrue(tc, all(bitand(L.hcode(t >= 101 & t < 200, 1), 3) == 3));  % main controller sees E-STOP
+verifyTrue(tc, all(L.tie(t >= 202 & t < 300, 1) == 1));              % technician reset restores it
+verifyTrue(tc, all(L.tie(t >= 100 & t < 300, 2) == 1));              % the other house is untouched
+verifyTrue(tc, any(L.mode(t > 255 & t < 300) == 2) && all(L.energised(t > 255 & t < 300) == 1));   % islanded fine
+verifyTrue(tc, all(L.energised(t >= 302) == 0));                     % SB E-stop in island: dark
+verifyTrue(tc, all(L.p_bess(t >= 302) == 0));
+end
