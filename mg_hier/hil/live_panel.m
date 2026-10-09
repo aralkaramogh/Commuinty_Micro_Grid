@@ -56,6 +56,7 @@ h.top  = uilabel(gs, 'Text', 'waiting for the first tick...', 'FontName', 'Conso
 h.node = uilabel(gs, 'Text', '', 'FontName', 'Consolas', 'FontSize', 12, 'VerticalAlignment', 'top');
 h.log  = uitextarea(gs, 'Editable', 'off', 'FontName', 'Consolas', 'FontSize', 11);
 f.UserData = h;
+live_sld('open');                    % live single-line diagram in its own window
 end
 
 function jump(d)

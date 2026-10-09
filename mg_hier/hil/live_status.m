@@ -52,6 +52,7 @@ end
 h.node.Text = strjoin(lines, newline);
 live_inputs('set', 'now_h', hh / 3600);                 % for the panel's 'jump clock'
 if dirty, h.log.Value = flip(log(:)); dirty = false; end   % newest first
+live_sld('update', clk, o, m, act, P);                  % live single-line diagram (if open)
 end
 
 function s = ifelse(c, a, b)

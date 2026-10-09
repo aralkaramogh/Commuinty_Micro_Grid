@@ -8,8 +8,12 @@ function link = pi_link_open(host, user, pass, port)
 % Needs the Industrial Communication Toolbox (mqttclient).
 if nargin < 4, port = 1883; end
 cfg = struct('host', string(host), 'port', port, 'user', string(user), 'pass', string(pass));
-mq = connect(cfg);
-assert(~isempty(mq), 'could not connect to the Pi broker at %s:%d as %s', host, port, user);
+[mq, why] = connect(cfg);
+if isempty(mq)
+    error(['Could not connect to the Pi broker at %s:%d as %s.\n  Reason: %s\n' ...
+           '  Check: Pi on the SAME Wi-Fi as this laptop? IP still %s (hostname -I on the Pi)? ' ...
+           'Mosquitto running (docker ps)? password for %s correct?'], host, port, user, why, host, user);
+end
 H = containers.Map();                     % handle: lets publish/fetch swap in a reconnected client
 H('mq') = mq; H('fails') = 0; H('t_retry') = tic;
 link.mq = mq;
@@ -19,17 +23,18 @@ link.close = @() clear_link(H('mq'));
 fprintf('Connected to the Pi broker %s:%d as %s (subscribed to mg/cmd/#)\n', host, port, user);
 end
 
-function mq = connect(cfg)
-% open the client and subscribe; [] if the broker cannot be reached
-mq = [];
+function [mq, why] = connect(cfg)
+% open the client and subscribe; [] (and the reason) if the broker cannot be reached
+mq = []; why = '';
 try
     c = mqttclient("tcp://" + cfg.host, Port = cfg.port, Username = cfg.user, ...
                    Password = cfg.pass, ClientID = "mgctl-matlab-" + string(randi(1e6)));
-    if ~c.Connected, return; end
+    if ~c.Connected, why = 'client created but not connected'; return; end
     subscribe(c, "mg/cmd/#", QualityOfService = 0);
     subscribe(c, "mg/sim/#", QualityOfService = 0);   % demo bench knobs
     mq = c;
-catch
+catch e
+    why = e.message;
 end
 end
 
