@@ -11,7 +11,7 @@ while true
         v = sscanf(s(3:end), '%f', 1);
         if v == seq, reply = s; return; end
     end
-    assert(~startsWith(s, 'E,'), 'node on %s: %s at tick %d', link.port, s, seq);
+    assert(~startsWith(s, 'E,') || strcmp(s, 'E,unknown'), 'node on %s: %s at tick %d', link.port, s, seq);
     assert(toc(t0) < 5, 'node on %s: wrong replies at tick %d', link.port, seq);
 end
 end

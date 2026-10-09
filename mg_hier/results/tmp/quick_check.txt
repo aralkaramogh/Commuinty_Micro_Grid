@@ -1,0 +1,6 @@
+S2_grid_outage pass=1
+S10_long_outage_blackout pass=1
+20:30:56 protection MAIN: BLACKOUT: community bus is dead (battery stopped, no grid)
+22:00:11 protection MAIN: Power restored to the community bus
+S11_demo_outage pass=1
+QUICK_DONE

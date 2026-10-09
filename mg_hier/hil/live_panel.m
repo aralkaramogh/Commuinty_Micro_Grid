@@ -1,13 +1,12 @@
 function f = live_panel()
 % LIVE_PANEL  Control panel for a live demo (run_hil_nodes / run_live_pi with SCEN = 'LIVE').
 % Left: WORLD knobs - change the simulated power system, like a bench.
-% Middle: REQUESTS - sent to the main controller exactly like dashboard buttons;
-%         it checks each one and may refuse it (the answer appears in the log).
+% (REQUESTS column removed for now: no dashboard/operator inputs in this demo.)
 % Right: live read-outs (mode, battery, grid, every node's relays, balances, log).
 live_inputs('reset');
 old = findall(groot, 'Tag', 'mgLivePanel'); delete(old);
-f = uifigure('Name', 'URJA microgrid - live demo panel', 'Position', [40 60 1060 680], 'Tag', 'mgLivePanel');
-g = uigridlayout(f, [1 3]); g.ColumnWidth = {300, 300, '1x'};
+f = uifigure('Name', 'URJA microgrid - live demo panel', 'Position', [40 60 900 680], 'Tag', 'mgLivePanel');
+g = uigridlayout(f, [1 2]); g.ColumnWidth = {320, '1x'};
 
 % ---------- WORLD ----------
 w = uipanel(g, 'Title', 'WORLD (simulated power system)', 'FontWeight', 'bold');
@@ -36,7 +35,7 @@ ids = {'H1', 'H2', 'CL', 'SB'};
 for k = 1:4
     uicheckbox(gw, 'Text', ['Cut link ' ids{k}], 'ValueChangedFcn', @(c,~) live_inputs('set_el', 'link_down', [k c.Value]));
 end
-uilabel(gw, 'Text', 'E-stop (virtual nodes)', 'FontWeight', 'bold'); uilabel(gw, 'Text', 'held = pressed');
+uilabel(gw, 'Text', 'E-stop (any node)', 'FontWeight', 'bold'); uilabel(gw, 'Text', 'held = pressed');
 for k = 1:4
     uibutton(gw, 'state', 'Text', ['E-STOP ' ids{k}], 'ValueChangedFcn', @(b,~) live_inputs('set_el', 'estop', [k b.Value]));
 end
@@ -46,20 +45,10 @@ end
 uilabel(gw, 'Text', 'RFID card at H2', 'FontWeight', 'bold'); uilabel(gw, 'Text', '');
 uibutton(gw, 'Text', 'Tap valid card (+Rs 20)', 'ButtonPushedFcn', @(~,~) live_inputs('tap', 2, 2712847106));
 uibutton(gw, 'Text', 'Tap wrong card',          'ButtonPushedFcn', @(~,~) live_inputs('tap', 2, 305419896));
+uilabel(gw, 'Text', ''); uilabel(gw, 'Text', '');
+uibutton(gw, 'Text', 'STOP run', 'BackgroundColor', [1 .8 .8], 'ButtonPushedFcn', @(~,~) live_inputs('set', 'stop', 1));
 
-% ---------- REQUESTS ----------
-r = uipanel(g, 'Title', 'REQUESTS to the main controller', 'FontWeight', 'bold');
-gr = uigridlayout(r, [9 1]); gr.RowHeight = repmat({30}, 1, 9);
-uilabel(gr, 'Text', 'Operator (main dashboard)', 'FontWeight', 'bold');
-uibutton(gr, 'Text', 'Restrict CL pump 10 min',  'ButtonPushedFcn', @(~,~) req('op', 'restrict', 'CL', 1, 600));
-uibutton(gr, 'Text', 'Restrict H2 flexible 10 min', 'ButtonPushedFcn', @(~,~) req('op', 'restrict', 'H2', 1, 600));
-uibutton(gr, 'Text', 'Release all restrictions', 'ButtonPushedFcn', @(~,~) cellfun(@(t) req('op', 'restrict', t, 0, 0), {'H1','H2','CL'}));
-uibutton(gr, 'Text', 'TRY: cut H2 critical load (must be refused)', 'ButtonPushedFcn', @(~,~) req('op', 'cut_critical', 'H2', 1, 60));
-uilabel(gr, 'Text', 'Household H1 (user dashboard)', 'FontWeight', 'bold');
-uibutton(gr, 'Text', 'H1: switch my flexible load off 5 min', 'ButtonPushedFcn', @(~,~) req('user/H1', 'user_flex', 'H1', 0, 300));
-uibutton(gr, 'Text', 'TRY: H1 switches off H2 (must be refused)', 'ButtonPushedFcn', @(~,~) req('user/H1', 'user_flex', 'H2', 0, 300));
-uibutton(gr, 'Text', 'STOP run', 'BackgroundColor', [1 .8 .8], 'ButtonPushedFcn', @(~,~) live_inputs('set', 'stop', 1));
-
+gw.RowHeight = repmat({22}, 1, numel(gw.RowHeight)); gw.RowSpacing = 4; gw.Scrollable = 'on';   % scroll if the window is short
 % ---------- READ-OUTS ----------
 s = uipanel(g, 'Title', 'LIVE STATUS', 'FontWeight', 'bold');
 gs = uigridlayout(s, [3 1]); gs.RowHeight = {150, 110, '1x'};

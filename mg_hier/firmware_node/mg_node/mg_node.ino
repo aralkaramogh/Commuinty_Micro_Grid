@@ -15,12 +15,20 @@
 static LoadSt ls; static SbSt bs;
 static char line[256]; static size_t len = 0; static char reply[200];
 static char role = '?'; static LoadOut lo; static SbOut so; static int bess_fault = 0;
+// MATLAB-link watchdog (display only, node core untouched): no line for LINK_TIMEOUT_MS ->
+// LED C blinks fast and the LCD says so, instead of freezing on the last state.
+#define LINK_TIMEOUT_MS 3000UL
+static unsigned long t_rx = 0;
+static bool soft_estop = false;     // 'S,1' / 'S,0' from MATLAB = panel E-stop button (same as the pin)
+static double sb_p_meas = 0;        // measured battery power (+ discharge) for the SB LEDs
+static bool link_lost() { return role != '?' && (millis() - t_rx) > LINK_TIMEOUT_MS; }
 
 static void leds(bool estop) {
     const bool blink = (millis() / 250) % 2;
     int a = 0, b = 0, c = 0, d = estop ? 1 : 0;
     if (role == 'L') { a = lo.tie; b = lo.flex; c = lo.comm_lost && blink; d = d || lo.hstate > 0; }   // hstate 3 = E-stop latched
-    if (role == 'B') { a = so.p > 0; b = so.p < 0; c = so.comm_lost && blink; d = d || so.clamped || bess_fault; }
+    if (role == 'B') { a = sb_p_meas > 50; b = sb_p_meas < -50; c = so.comm_lost && blink; d = d || so.clamped || bess_fault; }
+    if (link_lost()) c = (millis() / 100) % 2;          // fast blink = MATLAB script stopped
     digitalWrite(LED_A, (!estop && a) ? HIGH : LOW); digitalWrite(LED_B, (!estop && b) ? HIGH : LOW);
     digitalWrite(LED_C, c ? HIGH : LOW);             digitalWrite(LED_D, d ? HIGH : LOW);
 }
@@ -42,14 +50,16 @@ void setup() {
 }
 
 void loop() {
-    const bool estop = digitalRead(ESTOP_PIN) == LOW;
+    const bool estop = digitalRead(ESTOP_PIN) == LOW || soft_estop;
     leds(estop);
     while (Serial.available()) {
         char ch = (char)Serial.read();
         if (ch == '\r') continue;
         if (ch != '\n') { if (len < sizeof(line) - 1) line[len++] = ch; continue; }
         line[len] = '\0'; len = 0;
+        t_rx = millis();
         if (line[0] == 'R') { reset_all(); Serial.println("READY"); continue; }
+        if (line[0] == 'S') { soft_estop = (line[1] == ',' && line[2] == '1'); continue; }   // no reply
         if (line[0] == 'L') {
             LoadIn x;
             if (!parse_L(line, x)) { Serial.println("E,parse"); continue; }
@@ -58,7 +68,7 @@ void loop() {
         } else if (line[0] == 'B') {
             SbIn x;
             if (!parse_B(line, x)) { Serial.println("E,parse"); continue; }
-            role = 'B'; sb_step(bs, x, so, estop); bess_fault = x.bess_status;
+            role = 'B'; sb_step(bs, x, so, estop); bess_fault = x.bess_status; sb_p_meas = x.p_bess;
             format_b(reply, sizeof reply, x, so);
         } else { Serial.println("E,unknown"); continue; }
         Serial.println(reply);

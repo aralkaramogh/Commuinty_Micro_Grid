@@ -35,6 +35,13 @@ m = in.pcc;
 vg = m.v_grid / V0;
 grid_ok   = vg >= C.V_ok_lo && vg <= C.V_ok_hi && m.f_grid >= C.F_ok_lo && m.f_grid <= C.F_ok_hi;
 grid_lost = vg < C.V_lost;
+% blackout message: community bus dead for 3+ ticks after boot (ignores the 1-tick dip when the grid fails)
+if st.mode ~= 0 && m.v_c < C.V_lost * V0, st.n_dark = st.n_dark + 1; else, st.n_dark = 0; end
+if (st.n_dark >= 3) ~= st.dark
+    st.dark = double(st.n_dark >= 3);
+    if st.dark, tx = 'BLACKOUT: community bus is dead (battery stopped, no grid)'; else, tx = 'Power restored to the community bus'; end
+    o.events{end+1} = struct('type', 'protection', 'node', 'MAIN', 'text', tx);
+end
 if grid_ok
     st.n_good = st.n_good + 1; st.n_bad = 0;
 else
