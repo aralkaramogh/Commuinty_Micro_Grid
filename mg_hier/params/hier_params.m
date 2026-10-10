@@ -13,6 +13,20 @@ P.sim.dt        = 1.0;      % [s] plant step = controller tick
 P.sim.baud      = 115200;   % USB serial to the ESP32 nodes
 P.sim.timeout_s = 2.0;
 
+%% ---------- real data (post-hackathon; see data/README.md) ----------
+% P.data.mode = 'synthetic' keeps the old made-up profiles (all hackathon tests);
+% 'real' scenarios are built by sim/real_day_scenario.m from the processed files.
+P.data.site  = 'WCE Sangli';
+P.data.lat   = 16.85;  P.data.lon = 74.60;   % [deg] campus, approx. (NASA POWER grid cell is ~50 km anyway)
+P.data.year  = 2025;                         % solar/temperature year
+P.data.tz_h  = 5.5;                          % IST = UTC + 5:30
+P.data.dir   = fullfile(fileparts(fileparts(mfilename('fullpath'))), 'data');
+P.data.solar_file = sprintf('solar_sangli_%d.mat', P.data.year);   % in data/processed
+P.data.emarc_doi  = 'doi:10.7910/DVN/YJ5SP1';                      % Prayas eMARC, Harvard Dataverse, CC0
+P.data.load_file  = 'emarc_load_shapes.mat';                       % in data/processed
+P.data.load_mode  = 'sample';      % 'sample' = a real home-day from eMARC per house; 'typical' = average shape (much smoother)
+P.data.house_kWh_month = [NaN NaN]; % [H1 H2] units per month; NaN = eMARC Maharashtra median for that season (set from bills)
+
 %% ---------- AC system ----------
 P.ac.V_nom = 230;           % [V rms] [typical, India LT]
 P.ac.f_nom = 50;            % [Hz]

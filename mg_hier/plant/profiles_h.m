@@ -13,12 +13,24 @@ elseif h > 6 && h < 18
 end
 ext.G = G * sc.cloud_fn(t_s) * sc.pv_gain;
 ext.T_amb = P.pv.T_amb_mean + P.pv.T_amb_swing * sin(pi * (h - 9) / 12);
+if isfield(sc, 'G_fn') && ~isempty(sc.G_fn)      % real data (sim/real_day_scenario.m): measured sun + temperature
+    ext.G = sc.G_fn(t_s) * sc.cloud_fn(t_s) * sc.pv_gain;
+    ext.T_amb = sc.T_fn(t_s);
+end
 n = P.n_house;
 ext.d_crit = (0.6 + 0.4 * (h >= 18 && h < 23)) * ones(1, n);   % evening lights
 ext.d_flex = zeros(1, n);
 gain = sc.load_gain; if isfield(sc, 'load_gain_fn'), gain = sc.load_gain_fn(t_s); end   % live knob
 for k = 1:n      % load_gain > 1 = more appliances than usual (overload tests)
     ext.d_flex(k) = demand_shape(P.house(k).profile, h) * gain(k);
+end
+if isfield(sc, 'house_W_fn') && ~isempty(sc.house_W_fn)   % real household demand [W] (sim/real_day_scenario.m)
+    Dw = sc.house_W_fn(t_s) .* gain(1:n);
+    for k = 1:n      % split [assumed]: the first P_crit watts are essentials (fridge, lights), the rest is flexible
+        crit = min(Dw(k), P.house(k).P_crit);
+        ext.d_crit(k) = crit / P.house(k).P_crit;
+        ext.d_flex(k) = max(Dw(k) - crit, 0) / P.house(k).P_flex;
+    end
 end
 ext.d_comm = 1;                                                  % street lights + hall
 ext.d_cflex = demand_shape(P.comm.profile, h) * gain(n + 1);   % water pump
