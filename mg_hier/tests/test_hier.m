@@ -5,7 +5,7 @@ end
 
 function setupOnce(tc)
 root = fileparts(fileparts(mfilename('fullpath')));
-for f = {'params','plant','nodes','main','comms','pi','sim','tests','tools'}
+for f = {'params','plant','nodes','main','comms','pi','sim','tests','tools','hil'}   % hil: run_hier calls display_info
     addpath(fullfile(root, f{1}));
 end
 tc.TestData.P = hier_params();

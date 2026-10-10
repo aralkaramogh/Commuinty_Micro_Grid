@@ -1,0 +1,13 @@
+# Raw downloaded datasets: large (EMARC load file is 368 MB, above GitHub's 100 MB limit)
+# and re-downloadable with mg_hier/tools/data/fetch_*.m. Only processed extracts are committed.
+mg_hier/data/raw/
+
+# Files created by Windows / Google Drive sync, not project content
+desktop.ini
+.tmp.driveupload/
+
+# Scratch output of quick checks (not results)
+mg_hier/results/tmp/
+
+# Archived first model keeps its own separate git history
+archive/mg_twin/

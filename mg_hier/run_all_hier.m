@@ -5,7 +5,7 @@
 %  frame logs, Pi message samples)  4 Monte Carlo  5 SIL (node C++ vs MATLAB)  6 summary
 N_MC = 40;
 root = fileparts(mfilename('fullpath')); if isempty(root), root = pwd; end
-old = fullfile(fileparts(root), 'mg_ac');              % never mix with the single-controller version
+old = fullfile(fileparts(root), 'archive', 'mg_ac');   % never mix with the single-controller version (archived)
 for f = {'params','models','controller','comms','sim','tests','hil','tools'}
     p = fullfile(old, f{1}); if contains(path, p), rmpath(p); end
 end
