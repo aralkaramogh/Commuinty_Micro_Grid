@@ -13,6 +13,8 @@ Commuinty_Micro_Grid/
     roadmap/            post-hackathon roadmap
     images/             architecture pictures, screenshots
     claude_outputs/     files produced by Claude for the team
+  etap/
+    URJA_Microgrid/     ETAP 19 model (open Microgrid/Microgrid.OTI); notes + results in mg_hier/docs/etap/
   archive/              earlier generations, kept for reference only - do not develop here
     mg_twin/            12 V DC digital twin (first model, own git history)
     mg_ac/              AC single-controller version (hackathon Plan B)

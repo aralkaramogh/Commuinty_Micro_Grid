@@ -11,3 +11,13 @@ mg_hier/results/tmp/
 
 # Archived first model keeps its own separate git history
 archive/mg_twin/
+
+# ETAP: automatic backup, study results (regenerated on each run), service log
+etap/**/BACKUP/
+etap/**/*.LF1S
+etap/**/*.SI1S
+etap/**/*.HA1S
+etap/**/*.SA3S
+etap/**/*.RA1S
+etap/**/Svclog.log
+etap/**/_to_delete/
